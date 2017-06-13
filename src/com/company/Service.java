@@ -8,19 +8,29 @@ public class Service {
     private Double deltaT = 1.0 / 200.0;
     private int numberOfPoints = 101;
     private Double deltaX = 1.0 / numberOfPoints;
-    private double jump;
 
     private double[] uVel;
     private double[] vVel;
     private double[] a;
 
-    public Service(double jump) {
-        this.jump = jump;
+    private double[][] matrix;
+
+    public Service() {
         this.a = new double[numberOfPoints];
         this.uVel = new double[numberOfPoints];
         this.vVel = new double[numberOfPoints];
 
         initializeFirstTask();
+    }
+
+    public Service(int k) {
+        this.a = new double[numberOfPoints];
+        this.uVel = new double[numberOfPoints];
+        this.vVel = new double[numberOfPoints];
+
+        this.matrix = new double[(int) (4.2 / deltaT)][numberOfPoints];
+
+        initializeSecondTask();
     }
 
     private void initializeFirstTask() {
@@ -40,7 +50,7 @@ public class Service {
         }
     }
 
-    private void evaluateMeanVelocity() {
+    private void evaluateVelocity() {
         for (int i = 0; i < numberOfPoints; i++) {
             vVel[i] = vVel[i] + (deltaT / 2.0) * a[i];
         }
@@ -67,12 +77,30 @@ public class Service {
         double t = 0.0;
 
         do {
-            evaluateMeanVelocity();
+            evaluateVelocity();
             evaluateUVelocity();
             evaluateA();
-            evaluateMeanVelocity();
+            evaluateVelocity();
 
             t += deltaT;
         } while (t <= 2.0);
+    }
+
+    public void executeSecondTask() {
+        double t = 0.0;
+
+        do {
+            uVel[0] = 0.0;
+            uVel[numberOfPoints - 1] = 0.0;
+
+            System.arraycopy(uVel, 0, matrix[(int) (t / deltaT)], 0, numberOfPoints);
+
+            evaluateVelocity();
+            evaluateUVelocity();
+            evaluateA();
+            evaluateVelocity();
+
+            t += deltaT;
+        } while (t <= 4.0);
     }
 }
