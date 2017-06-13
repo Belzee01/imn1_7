@@ -1,5 +1,7 @@
 package com.company;
 
+import com.company.helpers.OdchylenieContainer;
+
 /**
  * Created by Belzee on 13.06.2017.
  */
@@ -15,10 +17,14 @@ public class Service {
 
     private double[][] matrix;
 
+    private OdchylenieContainer[] odchylenieContainers;
+
     public Service() {
         this.a = new double[numberOfPoints];
         this.uVel = new double[numberOfPoints];
         this.vVel = new double[numberOfPoints];
+
+        this.odchylenieContainers = new OdchylenieContainer[9];
 
         initializeFirstTask();
     }
@@ -27,8 +33,9 @@ public class Service {
         this.a = new double[numberOfPoints];
         this.uVel = new double[numberOfPoints];
         this.vVel = new double[numberOfPoints];
+        this.odchylenieContainers = new OdchylenieContainer[9];
 
-        this.matrix = new double[(int) (4.2 / deltaT)][numberOfPoints];
+        this.matrix = new double[(int) (4.0 / deltaT) + 10][numberOfPoints];
 
         initializeSecondTask();
     }
@@ -75,12 +82,20 @@ public class Service {
 
     public void executeFirstTask() {
         double t = 0.0;
+        int k = 0;
 
         do {
             evaluateVelocity();
             evaluateUVelocity();
             evaluateA();
             evaluateVelocity();
+
+            if (t % 0.25 == 0.0) {
+                for (int i = 0; i < numberOfPoints; i++) {
+                    odchylenieContainers[k].addNewValue(i * deltaX, uVel[i], calculateAnalyticUVelocityByIteration(i, t));
+                }
+                k++;
+            }
 
             t += deltaT;
         } while (t <= 2.0);
